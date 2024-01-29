@@ -15,22 +15,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					initial: "white",
 				},
 			],
-			contactList: [
-				// {
-				// 	full_name: "Dave Bradley",
-				// 	email: "dave@gmail.com",
-				// 	agenda_slug: "agenda-raul",
-				// 	address: "47568 NW 34ST, 33434 FL, USA",
-				// 	phone: "7864445566",
-				// },
-				// {
-				// 	full_name: "Pere Ayats",
-				// 	email: "test@gmail.com",
-				// 	agenda_slug: "agenda-raul",
-				// 	address: "BCN",
-				// 	phone: "3535566",
-				// },
-			],
+			contactList: [],
 			addcontact: {
 				full_name: "",
 				email: "",
@@ -135,16 +120,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 				console.log(store.addcontact);
 				// setStore({ addcontact: newContact });
 			},
-			updateContact: () => {
-				fetch(
-					"https://playground.4geeks.com/apis/fake/contact/agenda/agenda-raul",
-					{
-						method: "PUT",
-						body: [],
-					}
-				).then();
-			},
+
 			deleteAll: () => {
+				const action = getActions();
 				fetch(
 					"https://playground.4geeks.com/apis/fake/contact/agenda/agenda-raul",
 					{
@@ -159,27 +137,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 						return response.json();
 					})
 					.then(() => {
-						actions.loadContactList();
+						action.loadContactList();
 					})
 					.catch((error) => console.log("Error:", error));
+				action.loadContactList();
 			},
-			// Para actualizar los contactos, contactId es el id del contacto que quiero actualizar
-			// Con el método delete elimino el contacto recogiendo el id del contacto
 			deleteContact: async (contactId) => {
+				const action = getActions();
 				try {
 					const response = await fetch(
 						`https://playground.4geeks.com/apis/fake/contact/${contactId}`,
 						{
 							method: "DELETE",
 						}
-					).then(() => actions.loadContactList());
+					).then(() => action.loadContactList());
 				} catch (error) {
 					console.error("Error deleting contact:", error);
 				}
+				action.loadContactList();
 			},
 
 			// Input addcontact management
 			addContactField: (fieldName, fieldValue) => {
+				const action = getActions();
 				const store = getStore();
 				setStore({
 					addcontact: {
@@ -187,9 +167,52 @@ const getState = ({ getStore, getActions, setStore }) => {
 						[fieldName]: fieldValue,
 					},
 				});
+				action.getContacts();
+			},
+			updateContact: (contactId, updatedContact) => {
+				const action = getActions();
+				fetch(
+					`https://playground.4geeks.com/apis/fake/contact/${contactId}`,
+					{
+						method: "PUT", // Cambiamos el método a PUT para actualizar
+						body: JSON.stringify(updatedContact),
+						headers: {
+							"Content-Type": "application/json",
+						},
+					}
+				)
+					.then((response) => {
+						if (!response.ok) {
+							throw Error(response.statusText);
+						}
+						return response.json();
+					})
+					.then((updatedContact) => {
+						// Actualizamos el estado con el contacto actualizado
+						setStore((prevStore) => {
+							const updatedContactList =
+								prevStore.contactList.map((contact) =>
+									contact.id === contactId
+										? updatedContact
+										: contact
+								);
+							return {
+								...prevStore,
+								contactList: updatedContactList,
+							};
+						});
+					})
+					.catch((error) => console.log("Error:", error));
+			},
+			setSelectedContact: (contact) => {
+				setStore({ addcontact: contact });
 			},
 		},
 	};
 };
 
 export default getState;
+
+// Campos vacios de addcontact tras rellenarlo x segunda vez
+// Redireccionar tras crear contacto
+// getContacts tras delete all

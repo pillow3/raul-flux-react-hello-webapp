@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export function AddContact() {
 	const { store, actions } = useContext(Context);
-	// const store = getStore();
+	const navigate = useNavigate();
 
 	return (
 		<div>
@@ -66,7 +67,8 @@ export function AddContact() {
 						className="btn btn-primary"
 						onClick={() => {
 							actions.createContact(store.addcontact);
-							// actions.redirectToContact();
+							navigate("/contact");
+							// Limpiar los campos del contacto
 						}}>
 						Save
 					</button>
@@ -77,7 +79,6 @@ export function AddContact() {
 					</Link>
 				</div>
 			</form>
-			{/* <link>Back to contacts</link> */}
 		</div>
 	);
 }
