@@ -127,17 +127,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 					"https://playground.4geeks.com/apis/fake/contact/agenda/agenda-raul",
 					{
 						method: "DELETE",
-						body: JSON.stringify([]),
 					}
 				)
 					.then((response) => {
 						if (!response.ok) {
 							throw Error(response.statusText);
+						} else {
+							action.loadContactList();
 						}
-						return response.json();
-					})
-					.then(() => {
-						action.loadContactList();
 					})
 					.catch((error) => console.log("Error:", error));
 				action.loadContactList();
@@ -201,6 +198,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 								contactList: updatedContactList,
 							};
 						});
+						action.getContacts();
 					})
 					.catch((error) => console.log("Error:", error));
 			},
